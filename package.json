@@ -9,12 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.1.1",
+    "@tailwindcss/forms": "^0.5.3",
     "clsx": "^1.2.1",
     "next": "13.4.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.44.3",
-    "react-icons": "^4.9.0"
+    "react-icons": "^4.9.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/node": "20.3.1",
