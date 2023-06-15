@@ -1,5 +1,6 @@
-import './globals.css'
 import { Inter } from 'next/font/google'
+
+import { ToasterContext } from '../contexts/ToasterContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -8,6 +9,8 @@ export const metadata = {
   description: 'Chat de mensagem | Home',
 }
 
+import './globals.css'
+
 export default function RootLayout({
   children,
 }: {
@@ -15,7 +18,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ToasterContext />
+        {children}
+      </body>
     </html>
   )
 }

@@ -4,6 +4,9 @@ import { BsGithub, BsGoogle } from 'react-icons/bs'
 import { useForm } from "react-hook-form";
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from "zod";
+import { toast } from "react-hot-toast";
+
+import { api } from "../../lib/api";
 
 import { InputField } from "../InputField";
 import { Button } from "../Button";
@@ -12,10 +15,7 @@ import { AuthSocialButton } from "../AuthSocialButton";
 const contactFormSchema = z.object({
   name: z.string()
     .min(3, { message: 'O nome precisa ter pelo menos 3 caracteres.' })
-    .max(100, { message: 'O nome pode ter no máximo 100 caracteres.' })
-    .regex(/^([a-z\\-]+)$/i, {
-      message: 'O nome pode ter apenas letras e hifens.',
-    }),
+    .max(100, { message: 'O nome pode ter no máximo 100 caracteres.' }),
   email: z.string().email({ message: 'O e-mail precisa ser válido.' }),
   password: z.string()
     .min(6, { message: 'A senha precisa ter pelo menos 6 caracteres.' })
@@ -27,7 +27,7 @@ const contactFormSchema = z.object({
   if (confirmPassword !== password) {
     ctx.addIssue({
       code: "custom",
-      message: "As senhas não correspondem."
+      message: "As senhas não correspondem.",
     });
   }
 });
@@ -42,10 +42,21 @@ export function AuthForm() {
 
   const [variant, setVariant] = useState<Variant>('Login');
 
-  function onSubmit(data: ContactFormData) {
+  async function onSubmit(data: ContactFormData) {
     try {
       if (variant === 'Register') {
+        if (data.password !== data.confirmPassword) {
+          return;
+        }
 
+        await api.post('/register', {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }).catch(() => toast.error('Algo deu errado! Tente novamente.'))
+
+        toast.success('Conta criada com sucesso!');
+        reset();
       }
 
       if (variant === 'Login') {
@@ -76,13 +87,15 @@ export function AuthForm() {
           className="space-y-4"
         >
           {variant === 'Register' && (
-            <InputField
-              id="name"
-              label="Nome"
-              register={register}
-              errors={errors}
-              disabled={isSubmitting}
-            />
+            <>
+              <InputField
+                id="name"
+                label="Nome"
+                register={register}
+                errors={errors}
+                disabled={isSubmitting}
+              />
+            </>
           )}
 
           <InputField
@@ -104,13 +117,16 @@ export function AuthForm() {
           />
 
           {variant === 'Register' && (
-            <InputField
-              id="confirmPassword"
-              label="Confirmar senha"
-              register={register}
-              errors={errors}
-              disabled={isSubmitting}
-            />
+            <>
+              <InputField
+                id="confirmPassword"
+                type="password"
+                label="Confirmar senha"
+                register={register}
+                errors={errors}
+                disabled={isSubmitting}
+              />
+            </>
           )}
 
           <div>
