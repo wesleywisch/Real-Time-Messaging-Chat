@@ -1,74 +1,40 @@
 'use client'
 import { useCallback, useState } from "react"
+import toast from "react-hot-toast";
+import { signIn } from "next-auth/react";
 import { BsGithub, BsGoogle } from 'react-icons/bs'
-import { useForm } from "react-hook-form";
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from "zod";
-import { toast } from "react-hot-toast";
 
-import { api } from "../../lib/api";
-
-import { InputField } from "../InputField";
-import { Button } from "../Button";
 import { AuthSocialButton } from "../AuthSocialButton";
-
-const contactFormSchema = z.object({
-  name: z.string()
-    .min(3, { message: 'O nome precisa ter pelo menos 3 caracteres.' })
-    .max(100, { message: 'O nome pode ter no máximo 100 caracteres.' }),
-  email: z.string().email({ message: 'O e-mail precisa ser válido.' }),
-  password: z.string()
-    .min(6, { message: 'A senha precisa ter pelo menos 6 caracteres.' })
-    .max(500),
-  confirmPassword: z.string()
-    .min(6, { message: 'As senhas não correspondem.' })
-    .max(500),
-}).superRefine(({ confirmPassword, password }, ctx) => {
-  if (confirmPassword !== password) {
-    ctx.addIssue({
-      code: "custom",
-      message: "As senhas não correspondem.",
-    });
-  }
-});
+import { SignIn } from "./SignIn";
+import { Login } from "./Login";
 
 type Variant = 'Login' | 'Register'
-type ContactFormData = z.infer<typeof contactFormSchema>
 
 export function AuthForm() {
-  const { handleSubmit, register, reset, formState: { isSubmitting, errors } } = useForm<ContactFormData>({
-    resolver: zodResolver(contactFormSchema),
-  });
-
+  const [loading, setLoading] = useState(false);
   const [variant, setVariant] = useState<Variant>('Login');
 
-  async function onSubmit(data: ContactFormData) {
+  async function handleSocialsLogin(social: 'github' | 'google') {
     try {
-      if (variant === 'Register') {
-        if (data.password !== data.confirmPassword) {
-          return;
+      setLoading(true);
+
+      await signIn(social, {
+        redirect: false,
+      }).then((callback) => {
+        if (callback?.error) {
+          toast.error('Não foi possível realizar o login')
         }
 
-        await api.post('/register', {
-          name: data.name,
-          email: data.email,
-          password: data.password,
-        }).catch(() => toast.error('Algo deu errado! Tente novamente.'))
-
-        toast.success('Conta criada com sucesso!');
-        reset();
-      }
-
-      if (variant === 'Login') {
-
-      }
+        if (callback?.ok && !callback.error) {
+          toast.success('Login confirmado!')
+        }
+      })
     } catch (err) {
       console.log(err)
+      toast.error('Algo deu errado. Tente novamente!')
+    } finally {
+      setLoading(false)
     }
-  }
-
-  function handleSocialsLogin(social: string) {
-
   }
 
   const toggleVariant = useCallback(() => {
@@ -82,63 +48,13 @@ export function AuthForm() {
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4"
-        >
-          {variant === 'Register' && (
-            <>
-              <InputField
-                id="name"
-                label="Nome"
-                register={register}
-                errors={errors}
-                disabled={isSubmitting}
-              />
-            </>
-          )}
+        {variant === 'Register' && (
+          <SignIn />
+        )}
 
-          <InputField
-            id="email"
-            type="email"
-            label="E-mail"
-            register={register}
-            errors={errors}
-            disabled={isSubmitting}
-          />
-
-          <InputField
-            id="password"
-            label="Senha"
-            type="password"
-            register={register}
-            errors={errors}
-            disabled={isSubmitting}
-          />
-
-          {variant === 'Register' && (
-            <>
-              <InputField
-                id="confirmPassword"
-                type="password"
-                label="Confirmar senha"
-                register={register}
-                errors={errors}
-                disabled={isSubmitting}
-              />
-            </>
-          )}
-
-          <div>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              fullWidth
-            >
-              {variant === 'Login' ? 'Entrar' : 'Registrar'}
-            </Button>
-          </div>
-        </form>
+        {variant === 'Login' && (
+          <Login />
+        )}
 
         <div className="mt-6">
           <div className="relative">
@@ -157,10 +73,12 @@ export function AuthForm() {
             <AuthSocialButton
               Icon={BsGithub}
               onClick={() => handleSocialsLogin('github')}
+              disabled={loading}
             />
             <AuthSocialButton
               Icon={BsGoogle}
               onClick={() => handleSocialsLogin('google')}
+              disabled={loading}
             />
           </div>
         </div>
