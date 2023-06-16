@@ -1,8 +1,9 @@
 'use client'
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import toast from "react-hot-toast";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { BsGithub, BsGoogle } from 'react-icons/bs'
+import { useRouter } from "next/navigation";
 
 import { AuthSocialButton } from "../AuthSocialButton";
 import { SignIn } from "./SignIn";
@@ -11,6 +12,9 @@ import { Login } from "./Login";
 type Variant = 'Login' | 'Register'
 
 export function AuthForm() {
+  const session = useSession()
+  const router = useRouter()
+
   const [loading, setLoading] = useState(false);
   const [variant, setVariant] = useState<Variant>('Login');
 
@@ -27,6 +31,7 @@ export function AuthForm() {
 
         if (callback?.ok && !callback.error) {
           toast.success('Login confirmado!')
+          router.push('/users')
         }
       })
     } catch (err) {
@@ -44,6 +49,12 @@ export function AuthForm() {
       setVariant('Login')
     }
   }, [variant])
+
+  useEffect(() => {
+    if (session.status === 'authenticated') {
+      router.push('/users')
+    }
+  }, [session?.status, router])
 
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">

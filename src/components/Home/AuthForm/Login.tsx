@@ -4,9 +4,10 @@ import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
-import { Button } from "../Button";
-import { InputField } from "../InputField";
+import { Button } from "../../Button";
+import { InputField } from "../../InputField";
 
 const contactFormSchema = z.object({
   email: z.string().email({ message: 'O e-mail precisa ser válido.' }),
@@ -18,6 +19,8 @@ const contactFormSchema = z.object({
 type ContactFormData = z.infer<typeof contactFormSchema>
 
 export function Login() {
+  const router = useRouter()
+
   const { handleSubmit, register, reset, formState: { isSubmitting, errors } } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
   });
@@ -34,8 +37,8 @@ export function Login() {
         }
 
         if (callback?.ok && !callback.error) {
-          toast.success('Login confirmado!')
           reset()
+          router.push('/users')
         }
       })
     } catch (err) {

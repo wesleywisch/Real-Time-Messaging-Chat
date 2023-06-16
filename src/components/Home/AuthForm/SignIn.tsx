@@ -3,11 +3,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
-import { Button } from "../Button";
-import { InputField } from "../InputField";
+import { Button } from "../../Button";
+import { InputField } from "../../InputField";
 
-import { api } from "../../lib/api";
+import { api } from "../../../lib/api";
+import { signIn } from "next-auth/react";
 
 const contactFormSchema = z.object({
   name: z.string()
@@ -32,6 +34,8 @@ const contactFormSchema = z.object({
 type ContactFormData = z.infer<typeof contactFormSchema>
 
 export function SignIn() {
+  const router = useRouter()
+
   const { handleSubmit, register, reset, formState: { isSubmitting, errors } } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
   });
@@ -46,10 +50,15 @@ export function SignIn() {
         name: data.name,
         email: data.email,
         password: data.password,
-      }).catch(() => toast.error('Algo deu errado! Tente novamente.'))
+      }).then(() => signIn('credentials', {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      })).catch(() => toast.error('Algo deu errado! Tente novamente.'))
 
       toast.success('Conta criada com sucesso!');
       reset();
+      router.push('/users')
     } catch (err) {
       console.log(err)
     }
