@@ -1,6 +1,6 @@
 import { User } from "@prisma/client"
 import Image from "next/image";
-import { BsPersonFill } from 'react-icons/bs'
+import { IoPersonCircle } from 'react-icons/io5'
 
 type AvatarProps = {
   user?: User | null;
@@ -17,7 +17,7 @@ export function Avatar({ user }: AvatarProps) {
             fill
           />
         ) : (
-          <BsPersonFill size={36} />
+          <IoPersonCircle className="w-full h-full" />
         )}
       </div>
 

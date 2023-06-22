@@ -48,7 +48,7 @@ model Conversation {
   id            String   @id @default(uuid()) @map("_id")
   createdAt     DateTime @default(now())
   lastMessageAt DateTime @default(now())
-  name          String
+  name          String?
   isGroup       Boolean?
 
   messagesIds String[]
