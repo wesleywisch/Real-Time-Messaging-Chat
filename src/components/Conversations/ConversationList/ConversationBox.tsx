@@ -52,14 +52,14 @@ export function ConversationBox({ data, selected }: ConversationBoxProps) {
 
   const lastMessageText = useMemo(() => {
     if (lastMessage?.image) {
-      return 'Sent an image'
+      return 'Enviou uma imagem'
     }
 
     if (lastMessage?.body) {
       return lastMessage.body;
     }
 
-    return 'Started a conversation';
+    return 'Começar uma conversa';
   }, [lastMessage])
 
   return (
