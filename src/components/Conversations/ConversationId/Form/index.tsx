@@ -2,6 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { CldUploadButton } from "next-cloudinary";
 import { HiPhoto, HiPaperAirplane } from "react-icons/hi2";
 
 import { MessageInput } from "./MessageInput";
@@ -35,9 +36,26 @@ export function Form() {
     }
   }
 
+  async function handleUpload(result: any) {
+    try {
+      await api.post('/messages', {
+        image: result?.info?.secure_url,
+        conversationId,
+      })
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   return (
     <div className="py-4 px-4 bg-white border-t flex items-center gap-2 lg:gap-4 w-full">
-      <HiPhoto size={30} className="text-sky-500" />
+      <CldUploadButton
+        options={{ maxFiles: 1 }}
+        onUpload={handleUpload}
+        uploadPreset="g1usl1sb"
+      >
+        <HiPhoto size={30} className="text-sky-500" />
+      </CldUploadButton>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
