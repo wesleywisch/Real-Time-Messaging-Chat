@@ -72,6 +72,12 @@ export function MessageBox({ data, isLast }: MessageBox) {
             </p>
           )}
         </div>
+
+        {isLast && isOwn && seenList.length > 0 && (
+          <div>
+            <p className="text-xs font-light text-gray-500">{`Visto por ${seenList}`}</p>
+          </div>
+        )}
       </div>
     </div>
   )
